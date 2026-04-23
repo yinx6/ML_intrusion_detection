@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ML tracking and models
+mlruns/
+mlflow.db
+*.pkl
+*.h5
+*.model
+
+# Datasets (Ignoring because it contains very large CSV files)
+Dataset/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
