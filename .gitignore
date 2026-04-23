@@ -9,6 +9,7 @@ mlflow.db
 *.pkl
 *.h5
 *.model
+*.joblib
 
 # Datasets (Ignoring because it contains very large CSV files)
 Dataset/
