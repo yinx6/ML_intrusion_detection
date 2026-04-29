@@ -33,15 +33,21 @@ def get_supervised_models(n_classes: int, random_state: int = 42) -> Dict[str, o
             **xgb_kwargs,
         ),
         # Bug 8 fix: max_iter=60 caused ConvergenceWarning on large datasets.
-        # Increased to 300 and enabled early_stopping to avoid overfitting.
+        # Increased to 200 and enabled early_stopping to avoid overfitting.
+        # Bug 10 fix: batch_size was not set, so sklearn defaulted to
+        # min(200, n_samples). After SMOTE the dataset can be very large,
+        # producing an enormous number of gradient steps per epoch and making
+        # training effectively infinite. Explicit batch_size=1024 keeps each
+        # epoch fast regardless of dataset size.
         "mlp": MLPClassifier(
             hidden_layer_sizes=(256, 128),
             alpha=1e-4,
             learning_rate_init=1e-3,
-            max_iter=300,
+            batch_size=1024,
+            max_iter=200,
             early_stopping=True,
             validation_fraction=0.1,
-            n_iter_no_change=15,
+            n_iter_no_change=10,
             random_state=random_state,
         ),
     }

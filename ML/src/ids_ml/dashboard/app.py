@@ -14,6 +14,9 @@ metrics_file = Path("artifacts/metrics_summary.csv")
 if metrics_file.exists():
     st.subheader("Model comparison")
     df = pd.read_csv(metrics_file, index_col=0)
+    # Bug 12 fix: width='stretch' is not a valid Streamlit argument; width
+    # must be an integer (pixels). use_container_width=True is the correct
+    # API for a full-width dataframe.
     st.dataframe(df, use_container_width=True)
     st.bar_chart(df["f1_macro"])
 else:

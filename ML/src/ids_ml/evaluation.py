@@ -28,8 +28,11 @@ def _false_positive_rate_macro(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def evaluate_classifier(model, x, y, cv_splits: int = 5) -> Dict[str, float]:
+    # Bug 11 fix: n_jobs=1 forced all 5 CV folds to run sequentially on a
+    # single CPU core. n_jobs=-1 parallelises across all available cores,
+    # cutting wall-clock time by ~5x on machines with ≥5 cores.
     cv = StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=42)
-    y_pred = cross_val_predict(model, x, y, cv=cv, n_jobs=1)
+    y_pred = cross_val_predict(model, x, y, cv=cv, n_jobs=-1)
 
     return {
         "f1_macro": float(f1_score(y, y_pred, average="macro")),
