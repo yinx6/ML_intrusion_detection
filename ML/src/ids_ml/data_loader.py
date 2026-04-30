@@ -4,7 +4,9 @@ import logging
 from pathlib import Path
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +41,44 @@ def sanitize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     if constant_cols:
         logger.info("sanitize_dataframe: dropping %d constant column(s): %s", len(constant_cols), constant_cols)
     return cleaned.drop(columns=constant_cols)
+
+
+def make_split(
+    x: pd.DataFrame,
+    y: np.ndarray | pd.Series,
+    test_size: float = 0.2,
+    random_state: int = 42,
+) -> Tuple[pd.DataFrame, pd.DataFrame, np.ndarray, np.ndarray]:
+    """Stratified train/test split.
+
+    Parameters
+    ----------
+    x:
+        Feature matrix (already sanitized).
+    y:
+        Label array (encoded integers or raw strings — stratification works
+        for both).
+    test_size:
+        Fraction of samples to reserve for testing (default 0.20 = 20 %).
+    random_state:
+        Seed for reproducibility.
+
+    Returns
+    -------
+    x_train, x_test, y_train, y_test
+    """
+    x_train, x_test, y_train, y_test = train_test_split(
+        x,
+        y,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=y,
+    )
+    logger.info(
+        "make_split: train=%d rows (%.0f%%), test=%d rows (%.0f%%)",
+        len(x_train),
+        100.0 * len(x_train) / len(x),
+        len(x_test),
+        100.0 * len(x_test) / len(x),
+    )
+    return x_train, x_test, y_train, y_test

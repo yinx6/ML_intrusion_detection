@@ -16,6 +16,8 @@ def main() -> None:
     parser.add_argument("--output-dir", default="artifacts", help="Artifacts output directory")
     parser.add_argument("--sample-size", type=int, default=None, help="Optional sample size for fast experiments")
     parser.add_argument("--tracking-uri", default=None, help="Optional MLflow tracking URI")
+    parser.add_argument("--test-size", type=float, default=0.2, help="Fraction of data to hold out for testing (default: 0.20)")
+    parser.add_argument("--split-seed", type=int, default=42, help="Random seed for the train/test split (default: 42)")
     args = parser.parse_args()
 
     metrics = train_all(
@@ -24,6 +26,8 @@ def main() -> None:
         output_dir=args.output_dir,
         sample_size=args.sample_size,
         tracking_uri=args.tracking_uri,
+        test_size=args.test_size,
+        split_seed=args.split_seed,
     )
     print(json.dumps(metrics, indent=2))
 
