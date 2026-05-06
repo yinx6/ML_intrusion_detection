@@ -28,7 +28,30 @@ def _build_sampler(y_encoded) -> object:
     class_counts = pd.Series(y_encoded).value_counts()
     min_class_count = int(class_counts.min())
     if min_class_count >= 6:
-        return SMOTE(random_state=42)
+        k_neighbors = min(5, min_class_count - 1)
+
+        # A float sampling_strategy is only valid for binary targets.
+        # For multi-class we build a dict {class_label: target_count}.
+        # Cap: each minority class grows to at most 50 % of the majority
+        # class size — enough to reduce bias without exploding the dataset
+        # inside every CV fold (which makes MLP training very slow).
+        majority_count = int(class_counts.max())
+        cap = majority_count // 2
+        sampling_dict = {
+            int(cls): cap
+            for cls, count in class_counts.items()
+            if int(count) < cap  # SMOTE can only oversample, never undersample
+        }
+
+        # If every class is already at or above the cap, fall back to 'auto'
+        # (this can happen when classes are nearly balanced already).
+        strategy = sampling_dict if sampling_dict else "auto"
+
+        return SMOTE(
+            random_state=42,
+            k_neighbors=k_neighbors,
+            sampling_strategy=strategy,
+        )  # OOM safety handled by n_jobs=1 in cross_val_predict
     # Fallback for very rare classes where SMOTE would fail.
     return RandomOverSampler(random_state=42)
 

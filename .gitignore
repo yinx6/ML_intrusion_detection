@@ -5,13 +5,19 @@ __pycache__/
 
 # ML tracking and models
 mlruns/
+mlartifacts/
 mlflow.db
+sqli/
 *.pkl
 *.h5
 *.model
 *.joblib
 
-# Datasets (Ignoring because it contains very large CSV files)
+# Artifacts (models, outputs — keep .gitkeep placeholders)
+artifacts/*
+!artifacts/.gitkeep
+
+# Datasets (very large CSV files — not committed)
 Dataset/
 
 # Virtual Environments

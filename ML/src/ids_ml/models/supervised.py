@@ -32,22 +32,32 @@ def get_supervised_models(n_classes: int, random_state: int = 42) -> Dict[str, o
             n_jobs=-1,
             **xgb_kwargs,
         ),
-        # Bug 8 fix: max_iter=60 caused ConvergenceWarning on large datasets.
-        # Increased to 200 and enabled early_stopping to avoid overfitting.
-        # Bug 10 fix: batch_size was not set, so sklearn defaulted to
-        # min(200, n_samples). After SMOTE the dataset can be very large,
-        # producing an enormous number of gradient steps per epoch and making
-        # training effectively infinite. Explicit batch_size=1024 keeps each
-        # epoch fast regardless of dataset size.
+        # Performance notes:
+        # - solver='sgd' with momentum converges faster than adam on large
+        #   tabular datasets because each step is cheaper (no adaptive moments
+        #   to track) and sklearn's MLP is pure-NumPy / single-threaded.
+        # - Smaller architecture (128, 64) is sufficient for structured IDS
+        #   features and cuts forward/back-prop time per batch by ~4x vs (256,128).
+        # - batch_size=2048 reduces the number of gradient steps per epoch,
+        #   keeping each iteration fast after SMOTE over-sampling.
+        # - n_iter_no_change=5 (from 10) makes early stopping trigger sooner
+        #   once the validation loss plateaus, avoiding wasted epochs.
+        # - max_iter=100 is now the hard ceiling; early stopping will usually
+        #   stop well before this on a well-scaled dataset.
         "mlp": MLPClassifier(
-            hidden_layer_sizes=(256, 128),
+            hidden_layer_sizes=(128, 64),
+            solver="sgd",
+            momentum=0.9,
             alpha=1e-4,
-            learning_rate_init=1e-3,
-            batch_size=1024,
-            max_iter=200,
+            learning_rate="invscaling",
+            learning_rate_init=0.01,
+            power_t=0.5,
+            batch_size=2048,
+            max_iter=100,
+            shuffle=True,
             early_stopping=True,
             validation_fraction=0.1,
-            n_iter_no_change=10,
+            n_iter_no_change=5,
             random_state=random_state,
         ),
     }

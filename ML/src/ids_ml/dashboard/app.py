@@ -18,7 +18,7 @@ if metrics_file.exists():
     # must be an integer (pixelspowercfg /setactive d92ed291-5d91-42f7-9f8f-c0bc20645861). use_container_width=True is the correct
     # API for a full-width dataframe.
     st.dataframe(df, use_container_width=True)
-    st.bar_chart(df["f1_macro"])
+    st.bar_chart(df[["cv_f1_macro", "test_f1_macro"]])
 else:
     st.info("No training metrics found yet. Run training first.")
 

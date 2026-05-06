@@ -1,9 +1,42 @@
+# Virtual environments
 .venv/
+
+# Python bytecode
 __pycache__/
 *.pyc
+*.pyo
+
+# Test / type-check caches
 .pytest_cache/
 .mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ── Artifacts & models ────────────────────────────────────────────────────────
+# Keep the folder itself (via .gitkeep) but ignore everything inside it
 artifacts/*
 !artifacts/.gitkeep
+
+# Large binary model files (anywhere in the repo)
+*.joblib
+*.pkl
+*.h5
+*.model
+
+# ── MLflow ────────────────────────────────────────────────────────────────────
+# File-based run store (legacy, before SQLite backend)
 mlruns/
-.ipynb_checkpoints/
+
+# SQLite tracking database
+mlflow.db
+
+# Artifact store written by the SQLite-backed server
+mlartifacts/
+
+# Legacy file-based experiment store (created when --default-artifact-root
+# was set to a local path named "sqli" by mistake)
+sqli/
+
+# Generated metrics CSV (re-created on every training run)
+artifacts/metrics_summary.csv

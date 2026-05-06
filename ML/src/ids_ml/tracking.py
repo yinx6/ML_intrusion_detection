@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Dict
 
@@ -9,10 +10,16 @@ import mlflow.sklearn
 
 logger = logging.getLogger(__name__)
 
+# Default tracking server — override via --tracking-uri or the
+# MLFLOW_TRACKING_URI environment variable.
+_DEFAULT_TRACKING_URI = "http://localhost:5000"
+
 
 def setup_mlflow(tracking_uri: str | None = None, experiment_name: str = "ids-ml") -> None:
-    if tracking_uri:
-        mlflow.set_tracking_uri(tracking_uri)
+    # Priority: explicit arg → env var → default localhost server
+    uri = tracking_uri or os.environ.get("MLFLOW_TRACKING_URI") or _DEFAULT_TRACKING_URI
+    mlflow.set_tracking_uri(uri)
+    logger.info("MLflow tracking URI: %s", uri)
     mlflow.set_experiment(experiment_name)
 
 
